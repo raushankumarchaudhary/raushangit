@@ -1,38 +1,22 @@
-apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cliff.ai-assingment
-  labels:
-    app: web
+  name: knote
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      octopusexport: OctopusExport
-  replicas: 2
-  strategy:
-    type: RollingUpdate
+      app: knote
   template:
     metadata:
       labels:
-        app: web
-        octopusexport: OctopusExport
+        app: knote
     spec:
       containers:
-        - name: nginx
-          image: nginx
+        - name: app
+          image: learnk8s/knote-js:1.0.0
           ports:
-            - containerPort: 80
-        - name: raushankumarrr
-          image: cliff.ai-assingment
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: app
-                      operator: In
-                      values:
-                        - web
-                topologyKey: kubernetes.io/hostname
+            - containerPort: 3000
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo:27017/dev
+          imagePullPolicy: Always
