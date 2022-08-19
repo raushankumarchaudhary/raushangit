@@ -1,0 +1,30 @@
+node{
+    stage("scm clone"){
+        git branch: 'main', url: 'https://github.com/raushankumarchoudhary/raushangit.git'
+    }
+    stage("Build and create .tar") {
+       
+      nodejs('nodejs') {
+        sh 'rm -rf *.tar.gz'
+        sh 'npm install'
+        sh 'tar czf assingment.tar.gz node_modules src package.json yarn.lock spec'
+       }
+    }
+    stage("BUild Docker Image"){
+        sh "docker build -t raushankumarrr/cliff.ai-assingment ."
+        
+    }
+    stage("Docker push"){
+        withCredentials([string(credentialsId: 'DOCKER_HUB_PASSWORD', variable: 'DOCKER_HUB_PASSWORD')]) {
+        sh "docker login -u raushankumarrr -p ${DOCKER_HUB_PASSWORD}"
+     }
+        sh "docker push raushankumarrr/cliff.ai-assingment"
+    }
+    stage("Deploy Application in k8s cluster"){
+        kubernetesDeploy(
+            configs: 'cliff-assingments.yml',
+            kubeconfigId: 'KUBERNETES_CLUSTER_CONFIG',
+            enableConfigSubstitution: true
+            )
+    }
+}
