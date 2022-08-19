@@ -1,66 +1,38 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: cliffappconfigmap
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv-hostpath
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 1Gi
-  accessModes:
-  - ReadWriteOnce
-  hostPath:
-    path: "/tmp/mongodata"
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc-hostpath
-spec:
-  storageClassName: manual
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi
-
----
-## cliff-assingment App
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cliffappdeployment
+  name: cliff.ai-assingment
+  labels:
+    app: web
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: cliffapp
+      octopusexport: OctopusExport
+  replicas: 2
+  strategy:
+    type: RollingUpdate
   template:
     metadata:
-      name: cliffapppod
       labels:
-        app: cliffapp
+        app: web
+        octopusexport: OctopusExport
     spec:
       containers:
-      - name: cliffappcontainer
-        image: raushankumarrr/cliff.ai-assingment
-        ports:
-        - containerPort: 8080
-        
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: cliffapp
-spec:
-  selector:
-    app: cliffapp
-  ports:
-  - port: 80
-    targetPort: 8080
-  type: NodePort
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+        - name: raushankumarrr
+          image: cliff.ai-assingment
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - web
+                topologyKey: kubernetes.io/hostname
