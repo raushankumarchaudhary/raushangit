@@ -2,7 +2,7 @@ FROM node:latest
 
 MAINTAINER Raushan Kumar
 
-RUN echo "trying to complete my assingment"
+RUN echo "trying to complete my assingment-1"
 COPY . /var/www
 WORKDIR /var/www
 RUN npm install 
