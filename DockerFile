@@ -1,9 +1,10 @@
-FROM node:12-alpine
+FROM node:latest
 
-WORKDIR /app
+MAINTAINER Raushan Kumar
 
-COPY . ./
-
-RUN yarn install --production
-
-CMD ["npm", "run", "start"]
+RUN echo "trying to complete my assingment"
+COPY . /var/www
+WORKDIR /var/www
+RUN npm install 
+EXPOSE 3000
+ENTRYPOINT ["npm","start"]
